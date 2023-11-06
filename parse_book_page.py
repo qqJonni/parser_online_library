@@ -1,14 +1,13 @@
+import argparse
+import os
 import requests
 from bs4 import BeautifulSoup
-import os
 
 if not os.path.exists('books'):
     os.makedirs('books')
 
 if not os.path.exists('images'):
     os.makedirs('images')
-
-base_url = 'https://tululu.org/b1'
 
 
 def check_for_redirect(url):
@@ -44,8 +43,18 @@ def parse_book_page(url):
         if genre_info_element:
             genre_info = genre_info_element.find('a')['title']
             genre = genre_info.split(' - ')[0]
-            print(genre)
+            print(genre, '\n')
         else:
             print('Жанр не определен')
 
-parse_book_page(base_url)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Download books from tululu.org")
+    parser.add_argument("--start_id", type=int, default=1, help="Start page ID")
+    parser.add_argument("--end_id", type=int, default=10, help="End page ID")
+    args = parser.parse_args()
+    base_url = f'https://tululu.org/b{args.start_id}'
+
+    for page_id in range(args.start_id, args.end_id + 1):
+        current_url = f'https://tululu.org/b{page_id}'
+        parse_book_page(current_url)
