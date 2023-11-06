@@ -37,6 +37,15 @@ for book_id in range(1, num_books + 1):
     soup = BeautifulSoup(response.text, 'lxml')
     title_tag = soup.find('title')
     comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
+
+    genre_info_element = soup.find('span', class_='d_book')
+    if genre_info_element:
+        genre_info = genre_info_element.find('a')['title']
+        genre = genre_info.split(' - ')[0]
+        print(genre)
+    else:
+        print('Жанр не определен')
+
     if title_tag:
         full_title = title_tag.text.strip()
         book_title = full_title.split(' - ')[0]

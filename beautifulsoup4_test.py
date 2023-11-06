@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 num_books = 10
 
-url = 'https://tululu.org/b9/'
+url = 'https://tululu.org/b8/'
 response = requests.get(url)
 response.raise_for_status()
 soup = BeautifulSoup(response.text, 'lxml')
@@ -12,10 +12,12 @@ title_tag = soup.find('title')
 image_url = soup.find('img', src='/shots/9.jpg')['src']
 print(title_tag.text)
 print(f'https://tululu.org{image_url}')
-comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
-for comment in comments:
-    print(comment.text)
-
+# comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
+# for comment in comments:
+#     print(comment.text)
+genre_info = soup.find('span', class_='d_book').find('a')['title']
+genre = genre_info.split(' - ')[0]
+print(genre)
 
 
 
