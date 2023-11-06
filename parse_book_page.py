@@ -1,13 +1,6 @@
 import argparse
-import os
 import requests
 from bs4 import BeautifulSoup
-
-if not os.path.exists('books'):
-    os.makedirs('books')
-
-if not os.path.exists('images'):
-    os.makedirs('images')
 
 
 def check_for_redirect(url):
