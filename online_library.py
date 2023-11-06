@@ -36,12 +36,19 @@ for book_id in range(1, num_books + 1):
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
     title_tag = soup.find('title')
+    comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
     if title_tag:
         full_title = title_tag.text.strip()
         book_title = full_title.split(' - ')[0]
         print(f"Название книги {book_id}: {book_title}")
     else:
         print(f"Не удалось найти название книги {book_id} на странице.")
+
+    if comments:
+        for comment in comments:
+            print(comment.text)
+    else:
+        print('Комментарии не найдены')
 
     if response.ok:
         file_path = f'books/{book_title}.txt'
