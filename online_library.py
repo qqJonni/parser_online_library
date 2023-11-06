@@ -5,6 +5,9 @@ import os
 if not os.path.exists('books'):
     os.makedirs('books')
 
+if not os.path.exists('images'):
+    os.makedirs('images')
+
 base_url = 'https://tululu.org/b'
 num_books = 10
 
@@ -49,4 +52,16 @@ for book_id in range(1, num_books + 1):
     else:
         print(f"Не удалось скачать книгу {book_id}.")
 
-print("Все книги скачаны.")
+    image_url = soup.find('img', src='/shots/{}.jpg'.format(book_id))
+    if image_url:
+        image_url = 'https://tululu.org' + image_url['src']
+        image_response = requests.get(image_url)
+        image_response.raise_for_status()
+        image_path = f'images/{book_id}.jpg'
+        with open(image_path, 'wb') as image_file:
+            image_file.write(image_response.content)
+        print(f"Обложка книги {book_id} загружена успешно.")
+    else:
+        print(f"Не удалось найти обложку книги {book_id} на странице.")
+
+print("Все книги и обложки скачаны.")
