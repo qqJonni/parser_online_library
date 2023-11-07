@@ -23,7 +23,8 @@ def check_for_redirect(url):
 
 def download_books(start_id, end_id):
     for book_id in tqdm(range(start_id, end_id + 1)):
-        url = base_url + str(book_id) + '/'
+        url = '{}{}/'.format(base_url, book_id)
+
         if check_for_redirect(url):
             print(f"Книга {book_id} не доступна.")
             continue
