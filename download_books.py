@@ -39,15 +39,18 @@ def parse_book_title(book_id):
 
 def download_book(book_id, book_title):
     url = f'{base_url}{book_id}/'
-    response = requests.get(url)
-    if response.ok:
-        file_path = f'books/{book_title}.txt'
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(book_title + '\n\n')
-            file.write(response.text)
-        print(f"Книга {book_id} загружена успешно.")
-    else:
-        print(f"Не удалось скачать книгу {book_id}.")
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Генерировать исключение, если возникла ошибка в запросе
+    except requests.exceptions.RequestException as e:
+        print(f"Не удалось скачать книгу {book_id}. Ошибка: {e}")
+        return
+
+    file_path = f'books/{book_title}.txt'
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(book_title + '\n\n')
+        file.write(response.text)
+    print(f"Книга {book_id} загружена успешно.")
 
 
 def download_image(book_id):
