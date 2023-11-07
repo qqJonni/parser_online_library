@@ -18,43 +18,56 @@ def check_for_redirect(url):
     return False
 
 
+def parse_book_title(book_id):
+    url = f'{base_url}{book_id}/'
+    if check_for_redirect(url):
+        print(f"Книга {book_id} не доступна.")
+        return None
+
+    response = requests.get(url)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'lxml')
+    title_tag = soup.find('title')
+    if title_tag:
+        full_title = title_tag.text.strip()
+        book_title = full_title.split(' - ')[0]
+        return book_title
+    else:
+        print(f"Не удалось найти название книги {book_id} на странице.")
+        return None
+
+
+def download_book(book_id, book_title):
+    url = f'{base_url}{book_id}/'
+    response = requests.get(url)
+    if response.ok:
+        file_path = f'books/{book_title}.txt'
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(book_title + '\n\n')
+            file.write(response.text)
+        print(f"Книга {book_id} загружена успешно.")
+    else:
+        print(f"Не удалось скачать книгу {book_id}.")
+
+
+def download_image(book_id):
+    url = f'https://tululu.org/shots/{book_id}.jpg'
+    image_response = requests.get(url)
+    if image_response.ok:
+        image_path = f'images/{book_id}.jpg'
+        with open(image_path, 'wb') as image_file:
+            image_file.write(image_response.content)
+        print(f"Обложка книги {book_id} загружена успешно.")
+    else:
+        print(f"Не удалось найти обложку книги {book_id} на странице.")
+
+
 def download_books(start_id, end_id):
     for book_id in tqdm(range(start_id, end_id + 1)):
-        url = '{}{}/'.format(base_url, book_id)
-
-        if check_for_redirect(url):
-            print(f"Книга {book_id} не доступна.")
-            continue
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'lxml')
-        title_tag = soup.find('title')
-        if title_tag:
-            full_title = title_tag.text.strip()
-            book_title = full_title.split(' - ')[0]
-            print(f"Название книги {book_id}: {book_title}")
-        else:
-            print(f"Не удалось найти название книги {book_id} на странице.")
-        if response.ok:
-            file_path = f'books/{book_title}.txt'
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(full_title + '\n\n')
-                file.write(response.text)
-            print(f"Книга {book_id} загружена успешно.")
-        else:
-            print(f"Не удалось скачать книгу {book_id}.")
-
-        image_url = soup.find('img', src='/shots/{}.jpg'.format(book_id))
-        if image_url:
-            image_url = 'https://tululu.org' + image_url['src']
-            image_response = requests.get(image_url)
-            image_response.raise_for_status()
-            image_path = f'images/{book_id}.jpg'
-            with open(image_path, 'wb') as image_file:
-                image_file.write(image_response.content)
-            print(f"Обложка книги {book_id} загружена успешно.")
-        else:
-            print(f"Не удалось найти обложку книги {book_id} на странице.")
+        book_title = parse_book_title(book_id)
+        if book_title is not None:
+            download_book(book_id, book_title)
+            download_image(book_id)
 
     print("Все книги и обложки скачаны.")
 
