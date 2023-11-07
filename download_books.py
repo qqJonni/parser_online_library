@@ -4,9 +4,6 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import os
 
-os.makedirs('books', exist_ok=True)
-os.makedirs('images', exist_ok=True)
-
 
 def check_for_redirect(url):
     try:
@@ -63,6 +60,8 @@ def download_books(start_id, end_id):
 
 
 if __name__ == '__main__':
+    os.makedirs('books', exist_ok=True)
+    os.makedirs('images', exist_ok=True)
     parser = argparse.ArgumentParser(description="Download books and images from tululu.org")
     parser.add_argument("--start_id", type=int, default=1, help="Start book ID")
     parser.add_argument("--end_id", type=int, default=10, help="End book ID")
