@@ -4,11 +4,8 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import os
 
-if not os.path.exists('books'):
-    os.makedirs('books')
-
-if not os.path.exists('images'):
-    os.makedirs('images')
+os.makedirs('books', exist_ok=True)
+os.makedirs('images', exist_ok=True)
 
 
 def check_for_redirect(url):
