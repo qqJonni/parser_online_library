@@ -5,15 +5,17 @@ from bs4 import BeautifulSoup
 
 def check_for_redirect(url):
     try:
-        response = requests.head(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        content_type = soup.find('meta', {'http-equiv': 'Content-Type'})
-        if content_type and content_type['content'] == 'text/html;charset=windows-1251':
-            raise requests.exceptions.HTTPError(f"Неверный тип контента для URL: {url}")
+        response = requests.get(url)
+        response.raise_for_status()
+        if response.history:
+            for resp in response.history:
+                print(f"Redirected to: {resp.url}")
+            return True
+        else:
+            return False
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
         return True
-    return False
 
 
 def parse_book_page(url):
