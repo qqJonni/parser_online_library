@@ -7,13 +7,22 @@ import os
 
 def check_for_redirect(url):
     try:
-        response = requests.head(url)
+        response = requests.head(url, allow_redirects=True)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         content_type = soup.find('meta', {'http-equiv': 'Content-Type'})
-        if content_type and content_type['content'] == 'text/html;charset=windows-1251':
-            raise requests.exceptions.HTTPError(f"Неверный тип контента для URL: {url}")
+
+        if content_type and content_type.get('content', '').lower() == 'text/html;charset=windows-1251':
+            raise requests.exceptions.HTTPError(f"Invalid content type for URL: {url}")
+        if response.history:
+            print(f"Redirected to: {response.url}")
+            return True
+
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"Request Error: {e}")
         return True
     return False
 
