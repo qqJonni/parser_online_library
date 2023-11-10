@@ -3,6 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import os
+import time
+import sys
 
 
 def check_for_redirect(url):
@@ -30,7 +32,7 @@ def check_for_redirect(url):
 def parse_book_title(book_id):
     url = f'{base_url}{book_id}/'
     if check_for_redirect(url):
-        print(f"Книга {book_id} не доступна.")
+        print(f"Книга {book_id} не доступна.", file=sys.stderr)
         return None
 
     response = requests.get(url)
@@ -42,7 +44,7 @@ def parse_book_title(book_id):
         book_title = full_title.split(' - ')[0]
         return book_title
     else:
-        print(f"Не удалось найти название книги {book_id} на странице.")
+        print(f"Не удалось найти название книги {book_id} на странице.", file=sys.stderr)
         return None
 
 
@@ -50,9 +52,9 @@ def download_book(book_id, book_title):
     url = f'{base_url}{book_id}/'
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Генерировать исключение, если возникла ошибка в запросе
+        response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Не удалось скачать книгу {book_id}. Ошибка: {e}")
+        print(f"Не удалось скачать книгу {book_id}. Ошибка: {e}", file=sys.stderr)
         return
 
     file_path = f'books/{book_title}.txt'
@@ -64,14 +66,20 @@ def download_book(book_id, book_title):
 
 def download_image(book_id):
     url = f'https://tululu.org/shots/{book_id}.jpg'
-    image_response = requests.get(url)
+    try:
+        image_response = requests.get(url)
+        image_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Не удалось найти обложку книги {book_id} на странице. Ошибка: {e}", file=sys.stderr)
+        return
+
     if image_response.ok:
         image_path = f'images/{book_id}.jpg'
         with open(image_path, 'wb') as image_file:
             image_file.write(image_response.content)
         print(f"Обложка книги {book_id} загружена успешно.")
     else:
-        print(f"Не удалось найти обложку книги {book_id} на странице.")
+        print(f"Не удалось найти обложку книги {book_id} на странице.", file=sys.stderr)
 
 
 def download_books(start_id, end_id):
@@ -80,8 +88,12 @@ def download_books(start_id, end_id):
             book_title = parse_book_title(book_id)
             download_book(book_id, book_title)
             download_image(book_id)
+        except requests.exceptions.ConnectionError:
+            print(f"Ошибка сети. Повторная попытка через 5 секунд...", file=sys.stderr)
+            time.sleep(5)
+            continue
         except Exception as e:
-            print(f"Error processing book_id {book_id}: {e}")
+            print(f"Error processing book_id {book_id}: {e}", file=sys.stderr)
 
     print("Все книги и обложки скачаны.")
 
