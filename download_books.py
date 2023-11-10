@@ -76,10 +76,12 @@ def download_image(book_id):
 
 def download_books(start_id, end_id):
     for book_id in tqdm(range(start_id, end_id + 1)):
-        book_title = parse_book_title(book_id)
-        if book_title is not None:
+        try:
+            book_title = parse_book_title(book_id)
             download_book(book_id, book_title)
             download_image(book_id)
+        except Exception as e:
+            print(f"Error processing book_id {book_id}: {e}")
 
     print("Все книги и обложки скачаны.")
 
