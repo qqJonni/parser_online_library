@@ -77,9 +77,6 @@ def download_image(book_id):
         image_path = f'images/{book_id}.jpg'
         with open(image_path, 'wb') as image_file:
             image_file.write(image_response.content)
-        print(f"Обложка книги {book_id} загружена успешно.")
-    else:
-        print(f"Не удалось найти обложку книги {book_id} на странице.", file=sys.stderr)
 
 
 def download_books(start_id, end_id):
