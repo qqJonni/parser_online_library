@@ -27,14 +27,12 @@ pip install -r requirements.txt
 
 ### Запуск
 
-Эта команда скачивает книги и картинки.
+При запуске программы используйте аргументы `--start_page` и `--end_page`.
+Например:
 ```properties
-python download_books.py --start_id 5 --end_id 10
+python download_books.py 20 30
 ```
-Эта команда отображает название книг и жанр
-```properties
-parse_book_page.py --start_id 5 --end_id 10
-```
+Без указания аргументов дефолтные значения `--start_page` и `--end_page` равны 1 и 10.
 ### Примечания
 
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [dvmn.org](https://dvmn.org/).
