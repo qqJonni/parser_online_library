@@ -36,7 +36,7 @@ def get_filename_and_ext(img_url):
 
 def check_for_redirect(response):
     if response.status_code > 204:
-        raise HTTPError
+        raise HTTPError(f"HTTPError: {response.status_code} - {response.reason}")
 
 
 def download_txt(url, filename, folder='books/'):
@@ -135,7 +135,11 @@ def fetch_books(start_id, end_id):
             download_image(img_url, img_name)
 
             book_id += 1
-        except (HTTPError, AttributeError, ConnectionError):
+        except HTTPError as e:
+            print(f"HTTPError: Failed to fetch book with ID {book_id}. Error: {e}")
+            book_id += 1
+        except (AttributeError, ConnectionError) as e:
+            print(f"Error: Failed to fetch book with ID {book_id}. Error: {e}")
             book_id += 1
 
 
