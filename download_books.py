@@ -25,6 +25,15 @@ def get_command_line_argument():
     return start_id, end_id
 
 
+def parse_book_page(book_id):
+    """Get the BeautifulSoup object for the book page."""
+    url = f'https://tululu.org/b{book_id}/'
+    response = requests.get(url)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'lxml')
+    return soup
+
+
 def get_filename_and_ext(img_url):
     """Get the link address and extension."""
     url_address = urlsplit(img_url).path
@@ -54,18 +63,8 @@ def download_file(url, filename, folder='downloads/'):
     return file_path
 
 
-def get_book_page(book_id):
-    """Get the BeautifulSoup object for the book page."""
-    url = f'https://tululu.org/b{book_id}/'
-    response = requests.get(url)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'lxml')
-    return soup
-
-
-def get_book_name(book_id):
+def get_book_name(soup, book_id):
     """Get the name of the book."""
-    soup = get_book_page(book_id)
     title_tag = soup.find('td', class_='ow_px_td').find('div', id='content').find('h1')
     book_title = title_tag.text.split('::')[0].strip()
     book_name = f'{book_id}.{book_title}.txt'
@@ -74,9 +73,8 @@ def get_book_name(book_id):
     return book_name, book_title, genres_text
 
 
-def fetch_book_comments(book_id, book_name):
+def fetch_book_comments(soup, book_id, book_name):
     """Fetch and save book comments."""
-    soup = get_book_page(book_id)
     book_comments = soup.find_all('div', class_='texts')
     comments_path = Path('comments')
     comments_path.mkdir(parents=True, exist_ok=True)
@@ -88,10 +86,9 @@ def fetch_book_comments(book_id, book_name):
     return 'success'
 
 
-def get_img_url_name(book_id):
+def get_img_url_name(soup, book_id):
     """Get the URL and name of the book cover image."""
     url = 'https://tululu.org/'
-    soup = get_book_page(book_id)
     img = soup.find('div', class_='bookimage').find('img')['src']
     img_url = urljoin(url, img)
     img_name, _ = get_filename_and_ext(img_url)
@@ -103,17 +100,18 @@ def fetch_books(start_id, end_id):
     book_id = start_id
     while book_id <= end_id:
         try:
+            soup = parse_book_page(book_id)
             url = 'https://tululu.org/txt.php'
             params = {'id': book_id}
             response = requests.get(url, params=params, allow_redirects=False)
             check_for_redirect(response)
             response.raise_for_status()
             book_url = response.url
-            book_name, book_title, genres_text = get_book_name(book_id)
+            book_name, book_title, genres_text = get_book_name(soup, book_id)
             print(f'{book_title}\n{genres_text}\n')
-            fetch_book_comments(book_id, book_name)
+            fetch_book_comments(soup, book_id, book_name)
             download_file(book_url, book_name)
-            img_url, img_name = get_img_url_name(book_id)
+            img_url, img_name = get_img_url_name(soup, book_id)
             download_file(img_url, img_name)
 
             book_id += 1
