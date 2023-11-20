@@ -35,8 +35,9 @@ def get_filename_and_ext(img_url):
 
 
 def check_for_redirect(response):
-    if response.status_code > 204:
-        raise HTTPError(f"HTTPError: {response.status_code} - {response.reason}")
+    if response.history:
+        final_url = response.url
+        raise HTTPError(f"HTTPError: Redirect detected. Final URL: {final_url}")
 
 
 def download_txt(url, filename, folder='books/'):
