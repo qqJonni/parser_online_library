@@ -17,8 +17,10 @@ def get_command_line_argument():
                         default=1, type=int)
     parser.add_argument('end_id', nargs='?', help='Введите до какого id скачивать книги: ',
                         default=10, type=int)
-    start_id = parser.parse_args().start_id
-    end_id = parser.parse_args().end_id
+
+    args = parser.parse_args()
+    start_id = args.start_id
+    end_id = args.end_id
 
     return start_id, end_id
 
