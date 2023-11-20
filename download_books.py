@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from os.path import split, splitext
 from pathvalidate import sanitize_filename
-from requests import HTTPError
+from requests import HTTPError, ConnectionError
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlsplit, unquote
 
@@ -135,7 +135,7 @@ def fetch_books(start_id, end_id):
             download_image(img_url, img_name)
 
             book_id += 1
-        except (HTTPError, AttributeError):
+        except (HTTPError, AttributeError, ConnectionError):
             book_id += 1
 
 
