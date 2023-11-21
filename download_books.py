@@ -25,13 +25,32 @@ def get_command_line_argument():
     return start_id, end_id
 
 
-def parse_book_page(book_id):
-    """Get the BeautifulSoup object for the book page."""
-    url = f'https://tululu.org/b{book_id}/'
-    response = requests.get(url)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'lxml')
-    return soup
+def parse_book_page(book_id, response, dest_folder):
+    soup = BeautifulSoup(response.text, "lxml")
+    title_tag = soup.select_one("#content > h1").text
+    book_comments = soup.select(".texts .black")
+    img_src = soup.select_one("div.bookimage img")["src"]
+    genres_tag = soup.select("span.d_book a")
+    book_title = title_tag.split("::")[0].strip()
+    book_author = title_tag.split("::")[1].strip()
+    book_name = f"{book_id}.{book_title}.txt"
+    genres_text = [x.text for x in genres_tag]
+    comments_text = [com.text for com in book_comments]
+
+    img_name, _ = get_filename_and_ext(img_src)
+    normal_img_filename = sanitize_filename(img_name)
+    img_path = os.path.join(dest_folder, 'images', normal_img_filename).replace('\\', '/')
+    normal_book_filename = sanitize_filename(book_name)
+    book_path = os.path.join(dest_folder, 'books', normal_book_filename).replace('\\', '/')
+    book_description = {
+        "title": book_title,
+        "author": book_author,
+        "img_src": img_path,
+        "book_path": book_path,
+        "comments": comments_text,
+        "genres": genres_text,
+    }
+    return book_name, img_src, img_name, book_description
 
 
 def get_filename_and_ext(img_url):
