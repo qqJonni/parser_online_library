@@ -144,7 +144,10 @@ def fetch_books(start_id, end_id):
 
 def main():
     start_id, end_id = get_command_line_argument()
-    fetch_books(start_id, end_id)
+    try:
+        fetch_books(start_id, end_id)
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 if __name__ == '__main__':
