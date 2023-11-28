@@ -146,7 +146,9 @@ def main():
     start_id, end_id = get_command_line_argument()
     try:
         fetch_books(start_id, end_id)
-    except Exception as e:
+    except HTTPError as e:
+        print(f"HTTPError: {e}")
+    except (AttributeError, ConnectionError) as e:
         print(f"Error: {e}")
 
 
