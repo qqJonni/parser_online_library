@@ -116,30 +116,20 @@ def get_img_url_name(soup, book_id):
 
 def fetch_books(start_id, end_id):
     """Fetch and download books within the specified range of IDs."""
-    book_id = start_id
-    while book_id <= end_id:
-        try:
-            soup = parse_book_page(book_id)
-            url = 'https://tululu.org/txt.php'
-            params = {'id': book_id}
-            response = requests.get(url, params=params, allow_redirects=False)
-            check_for_redirect(response)
-            response.raise_for_status()
-            book_url = response.url
-            book_name, book_title, genres_text = get_book_name(soup, book_id)
-            print(f'{book_title}\n{genres_text}\n')
-            fetch_book_comments(soup, book_id, book_name)
-            download_file(book_url, book_name)
-            img_url, img_name = get_img_url_name(soup, book_id)
-            download_file(img_url, img_name)
-
-            book_id += 1
-        except HTTPError as e:
-            print(f"HTTPError: Failed to fetch book with ID {book_id}. Error: {e}")
-            book_id += 1
-        except (AttributeError, ConnectionError) as e:
-            print(f"Error: Failed to fetch book with ID {book_id}. Error: {e}")
-            book_id += 1
+    for book_id in range(start_id, end_id + 1):
+        soup = parse_book_page(book_id)
+        url = 'https://tululu.org/txt.php'
+        params = {'id': book_id}
+        response = requests.get(url, params=params, allow_redirects=False)
+        check_for_redirect(response)
+        response.raise_for_status()
+        book_url = response.url
+        book_name, book_title, genres_text = get_book_name(soup, book_id)
+        print(f'{book_title}\n{genres_text}\n')
+        fetch_book_comments(soup, book_id, book_name)
+        download_file(book_url, book_name)
+        img_url, img_name = get_img_url_name(soup, book_id)
+        download_file(img_url, img_name)
 
 
 def main():
